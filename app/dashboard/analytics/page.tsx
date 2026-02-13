@@ -3,7 +3,7 @@
 import { PageHeader } from "@/components/dashboard/page-header"
 import { ChartCard } from "@/components/dashboard/chart-card"
 import { LineChartComponent } from "@/components/line-chart"
-import { AreaChartComponent } from "@/components/area-chart"
+import { ComboChartComponent } from "@/components/combo-chart"
 import { useCustomerData } from "@/hooks/use-customer-data"
 import {
   getMonthlySubscriptions,
@@ -87,7 +87,7 @@ export default function AnalyticsPage() {
           title="Customer Growth Trend"
           description="Cumulative customer acquisition over time"
         >
-          <AreaChartComponent
+          <ComboChartComponent
             height={350}
             option={{
               tooltip: {

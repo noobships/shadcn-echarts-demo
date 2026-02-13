@@ -136,8 +136,16 @@ export default function CustomersPage() {
               option={{
                 tooltip: {
                   trigger: "item",
-                  formatter: (params: { data: (string | number)[] }) => {
-                    return `${params.data[2]}: ${params.data[1]} customers`
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const values = Array.isArray(item?.data) ? item.data : []
+                    const label = String(values[2] ?? item?.name ?? "Unknown")
+                    const count =
+                      typeof values[1] === "number" || typeof values[1] === "string"
+                        ? values[1]
+                        : 0
+
+                    return `${label}: ${count} customers`
                   },
                 },
                 xAxis: {

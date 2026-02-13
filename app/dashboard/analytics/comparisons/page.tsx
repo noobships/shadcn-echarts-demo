@@ -127,13 +127,20 @@ export default function ComparisonsPage() {
               option={{
                 tooltip: {
                   trigger: "item",
-                  formatter: (params: { name: string; data: number[] }) => {
-                    return `${params.name}<br/>
-                      Min: ${params.data[1]}<br/>
-                      Q1: ${params.data[2]}<br/>
-                      Median: ${params.data[3]}<br/>
-                      Q3: ${params.data[4]}<br/>
-                      Max: ${params.data[5]}`
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const values = Array.isArray(item?.data)
+                      ? item.data.map(value => (typeof value === "number" ? value : Number(value)))
+                      : []
+                    const [min, q1, median, q3, max] =
+                      values.length >= 5 ? values.slice(-5) : [0, 0, 0, 0, 0]
+
+                    return `${String(item?.name ?? "")}<br/>
+                      Min: ${min}<br/>
+                      Q1: ${q1}<br/>
+                      Median: ${median}<br/>
+                      Q3: ${q3}<br/>
+                      Max: ${max}`
                   },
                 },
                 grid: {
