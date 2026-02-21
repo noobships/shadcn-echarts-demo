@@ -12,8 +12,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@devstool/shadcn-echarts':
-        specifier: ^0.1.2
-        version: 0.1.2(echarts@6.0.0)(react@19.2.3)
+        specifier: ^0.3.0
+        version: 0.3.0(echarts@6.0.0)(react@19.2.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -240,8 +240,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@devstool/shadcn-echarts@0.1.2':
-    resolution: {integrity: sha512-HnV7HVJr8/KM7OIYElCIjoA0nRgf9ZfQC3wjDMzZoNxvOzbldNAkF82hEp9ubUgw5dvxH5tuXxeGf31G1+fSew==}
+  '@devstool/shadcn-echarts@0.3.0':
+    resolution: {integrity: sha512-9+0QiSt5hYhMYjaf80yr0mBli82Ewn4bdj6PuAXzwBhfz3+aeuK9B+qPyTFJ9gxj5G5hfOmAzpSvbQU++FTHKQ==}
     peerDependencies:
       echarts: '>=6.0.0'
       react: '>=18.0.0'
@@ -3357,7 +3357,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@devstool/shadcn-echarts@0.1.2(echarts@6.0.0)(react@19.2.3)':
+  '@devstool/shadcn-echarts@0.3.0(echarts@6.0.0)(react@19.2.3)':
     dependencies:
       culori: 4.0.2
       echarts: 6.0.0

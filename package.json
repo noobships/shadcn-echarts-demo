@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
-    "@devstool/shadcn-echarts": "^0.1.2",
+    "@devstool/shadcn-echarts": "^0.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "echarts": "^6.0.0",
