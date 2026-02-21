@@ -12,32 +12,22 @@ import {
   getTopCountries,
   getDomainDistribution,
 } from "@/lib/customer-data"
+import {
+  barStartEdgeRadius,
+  chartMotionDefaults,
+  demoBlueScale,
+  safeHeatmapEmphasis,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 
 export default function DistributionPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Distribution Charts"
-          breadcrumbs={[{ label: "Distribution Charts" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-80 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const monthlyData = getMonthlySubscriptions(customers)
-  const yearlyData = getSubscriptionsByYear(customers)
-  const topCountries = getTopCountries(customers, 10)
-  const domainData = getDomainDistribution(customers)
+  const hasData = customers.length > 0
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
+  const topCountries = hasData ? getTopCountries(customers, 10) : []
+  const domainData = hasData ? getDomainDistribution(customers) : []
 
   // Create heatmap data: [month, year, value]
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -78,6 +68,7 @@ export default function DistributionPage() {
           <HeatmapChartComponent
             height={250}
             option={{
+              ...chartMotionDefaults,
               tooltip: {
                 position: "top",
                 formatter: params => {
@@ -88,7 +79,12 @@ export default function DistributionPage() {
                   const [monthIndex, yearIndex, count] =
                     values.length >= 3 ? values : [0, 0, 0]
 
-                  return `${months[monthIndex]} ${years[yearIndex]}: ${count} customers`
+                  return tooltipMarkerLabelValue(
+                    item,
+                    `${months[monthIndex]} ${years[yearIndex]}`,
+                    count,
+                    " customers"
+                  )
                 },
               },
               grid: {
@@ -109,13 +105,13 @@ export default function DistributionPage() {
               },
               visualMap: {
                 min: 0,
-                max: Math.max(...monthlyData.map(m => m.count)),
+                max: Math.max(...monthlyData.map(m => m.count), 1),
                 calculable: true,
                 orient: "horizontal",
                 left: "center",
                 bottom: "0%",
                 inRange: {
-                  color: ["var(--chart-5)", "var(--chart-3)", "var(--chart-1)"],
+                  color: [...demoBlueScale],
                 },
               },
               series: [
@@ -123,15 +119,15 @@ export default function DistributionPage() {
                   name: "Signups",
                   type: "heatmap",
                   data: heatmapData,
+                  itemStyle: {
+                    borderWidth: 0,
+                    borderColor: "transparent",
+                    borderRadius: 2,
+                  },
                   label: {
-                    show: true,
+                    show: false,
                   },
-                  emphasis: {
-                    itemStyle: {
-                      shadowBlur: 10,
-                      shadowColor: "rgba(0, 0, 0, 0.5)",
-                    },
-                  },
+                  emphasis: safeHeatmapEmphasis(),
                 },
               ],
             }}
@@ -172,7 +168,7 @@ export default function DistributionPage() {
                     type: "bar",
                     data: countBuckets,
                     itemStyle: {
-                      borderRadius: [4, 4, 0, 0],
+                      borderRadius: barStartEdgeRadius("vertical", 4),
                     },
                     barWidth: "60%",
                   },
@@ -213,7 +209,7 @@ export default function DistributionPage() {
                     type: "bar",
                     data: domainData.map(d => d.count),
                     itemStyle: {
-                      borderRadius: [4, 4, 0, 0],
+                      borderRadius: barStartEdgeRadius("vertical", 4),
                     },
                   },
                 ],
@@ -241,7 +237,7 @@ export default function DistributionPage() {
                       ? values[1]
                       : 0
 
-                  return `${label}: ${count} customers`
+                  return tooltipMarkerLabelValue(item, label, count, " customers")
                 },
               },
               grid: {

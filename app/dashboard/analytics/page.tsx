@@ -9,42 +9,26 @@ import {
   getMonthlySubscriptions,
   getQuarterlyStats,
 } from "@/lib/customer-data"
+import { barStartEdgeRadius } from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { TrendingUpIcon, ActivityIcon, BarChart2Icon, LineChartIcon } from "lucide-react"
 
 export default function AnalyticsPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Analytics"
-          breadcrumbs={[{ label: "Analytics" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const monthlyData = getMonthlySubscriptions(customers)
-  const quarterlyData = getQuarterlyStats(customers)
+  const hasData = customers.length > 0
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
+  const quarterlyData = hasData ? getQuarterlyStats(customers) : []
 
   // Calculate trend metrics
   const lastThreeMonths = monthlyData.slice(-3)
   const prevThreeMonths = monthlyData.slice(-6, -3)
-  const recentAvg = lastThreeMonths.reduce((sum, m) => sum + m.count, 0) / 3
-  const prevAvg = prevThreeMonths.reduce((sum, m) => sum + m.count, 0) / 3
-  const trendPercent = prevAvg > 0 ? ((recentAvg - prevAvg) / prevAvg * 100).toFixed(1) : 0
+  const recentAvg = lastThreeMonths.length > 0 ? lastThreeMonths.reduce((sum, m) => sum + m.count, 0) / lastThreeMonths.length : 0
+  const prevAvg = prevThreeMonths.length > 0 ? prevThreeMonths.reduce((sum, m) => sum + m.count, 0) / prevThreeMonths.length : 0
+  const trendPercent = prevAvg > 0 ? ((recentAvg - prevAvg) / prevAvg * 100).toFixed(1) : "0"
 
-  const maxMonth = monthlyData.reduce((max, m) => m.count > max.count ? m : max, monthlyData[0])
-  const minMonth = monthlyData.reduce((min, m) => m.count < min.count ? m : min, monthlyData[0])
+  const maxMonth = monthlyData.length > 0 ? monthlyData.reduce((max, m) => m.count > max.count ? m : max, monthlyData[0]) : null
+  const minMonth = monthlyData.length > 0 ? monthlyData.reduce((min, m) => m.count < min.count ? m : min, monthlyData[0]) : null
 
   return (
     <>
@@ -76,7 +60,7 @@ export default function AnalyticsPage() {
           />
           <StatCard
             title="Monthly Average"
-            value={Math.round(monthlyData.reduce((sum, m) => sum + m.count, 0) / monthlyData.length)}
+            value={monthlyData.length > 0 ? Math.round(monthlyData.reduce((sum, m) => sum + m.count, 0) / monthlyData.length) : 0}
             description="customers per month"
             icon={<LineChartIcon className="h-5 w-5" />}
           />
@@ -139,7 +123,7 @@ export default function AnalyticsPage() {
                   yAxisIndex: 1,
                   data: monthlyData.map(d => d.count),
                   itemStyle: {
-                    borderRadius: [4, 4, 0, 0],
+                    borderRadius: barStartEdgeRadius("vertical", 4),
                   },
                 },
               ],

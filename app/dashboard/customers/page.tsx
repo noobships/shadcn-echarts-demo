@@ -11,33 +11,21 @@ import {
   getMonthlySubscriptions,
   calculateGrowthMetrics,
 } from "@/lib/customer-data"
+import {
+  axisGridPreset,
+  barStartEdgeRadius,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { UsersIcon, BuildingIcon, TrendingUpIcon, CalendarIcon } from "lucide-react"
 
 export default function CustomersPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Customers"
-          breadcrumbs={[{ label: "Customers" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const metrics = calculateGrowthMetrics(customers)
-  const topCompanies = getTopCompanies(customers, 15)
-  const monthlyData = getMonthlySubscriptions(customers)
+  const hasData = customers.length > 0
+  const metrics = hasData ? calculateGrowthMetrics(customers) : { totalCustomers: 0, uniqueCountries: 0, uniqueCompanies: 0, avgPerMonth: 0, growthRate: 0, lastMonthCount: 0 }
+  const topCompanies = hasData ? getTopCompanies(customers, 15) : []
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
 
   // Create scatter data for company size distribution
   const companyScatterData = topCompanies.map((company, idx) => [
@@ -45,6 +33,7 @@ export default function CustomersPage() {
     company.count,
     company.name,
   ])
+  const horizontalBarGrid = axisGridPreset({ horizontalBar: true })
 
   return (
     <>
@@ -104,10 +93,12 @@ export default function CustomersPage() {
                 },
                 xAxis: {
                   type: "value",
+                  ...horizontalBarGrid.xAxis,
                 },
                 yAxis: {
                   type: "category",
                   data: topCompanies.map(d => d.name).reverse(),
+                  ...horizontalBarGrid.yAxis,
                   axisLabel: {
                     width: 120,
                     overflow: "truncate",
@@ -119,7 +110,7 @@ export default function CustomersPage() {
                     type: "bar",
                     data: topCompanies.map(d => d.count).reverse(),
                     itemStyle: {
-                      borderRadius: [0, 4, 4, 0],
+                      borderRadius: barStartEdgeRadius("horizontal", 4),
                     },
                   },
                 ],
@@ -145,7 +136,7 @@ export default function CustomersPage() {
                         ? values[1]
                         : 0
 
-                    return `${label}: ${count} customers`
+                    return tooltipMarkerLabelValue(item, label, count, " customers")
                   },
                 },
                 xAxis: {

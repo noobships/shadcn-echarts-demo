@@ -10,33 +10,19 @@ import {
   getCustomersByContinent,
   getTopCountries,
 } from "@/lib/customer-data"
+import {
+  barStartEdgeRadius,
+  chartMotionDefaults,
+  safeSeriesBorderStyle,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 
 export default function RegionsPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Regions"
-          breadcrumbs={[
-            { label: "Geography", href: "/dashboard/geography" },
-            { label: "Regions" },
-          ]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-80 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const continentData = getCustomersByContinent(customers)
-  const topCountries = getTopCountries(customers, 20)
+  const hasData = customers.length > 0
+  const continentData = hasData ? getCustomersByContinent(customers) : []
+  const topCountries = hasData ? getTopCountries(customers, 20) : []
 
   // Group countries by region for comparison
   const regionData = {
@@ -79,7 +65,7 @@ export default function RegionsPage() {
                 radar: {
                   indicator: continentData.map(d => ({
                     name: d.name,
-                    max: Math.max(...continentData.map(x => x.value)) * 1.2,
+                    max: Math.max(...continentData.map(x => x.value), 1) * 1.2,
                   })),
                   shape: "polygon",
                   splitNumber: 5,
@@ -88,18 +74,14 @@ export default function RegionsPage() {
                   {
                     name: "Regions",
                     type: "radar",
-                    data: [
-                      {
-                        value: continentData.map(d => d.value),
-                        name: "Customer Count",
-                        areaStyle: {
-                          opacity: 0.3,
-                        },
-                        lineStyle: {
-                          width: 2,
-                        },
-                      },
-                    ],
+                    data: continentData.length > 0
+                      ? [{
+                          value: continentData.map(d => d.value),
+                          name: "Customer Count",
+                          areaStyle: { opacity: 0.3 },
+                          lineStyle: { width: 2 },
+                        }]
+                      : [],
                   },
                 ],
               }}
@@ -113,9 +95,27 @@ export default function RegionsPage() {
             <PieChartComponent
               height={380}
               option={{
+                ...chartMotionDefaults,
                 tooltip: {
                   trigger: "item",
-                  formatter: "{b}: {c} ({d}%)",
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const value =
+                      typeof item?.value === "number" || typeof item?.value === "string"
+                        ? item.value
+                        : 0
+                    const percent =
+                      typeof item?.percent === "number"
+                        ? item.percent
+                        : Number(item?.percent ?? 0)
+
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(item?.name ?? "Unknown"),
+                      value,
+                      ` (${percent}%)`
+                    )
+                  },
                 },
                 legend: {
                   orient: "horizontal",
@@ -130,8 +130,7 @@ export default function RegionsPage() {
                     roseType: "radius",
                     itemStyle: {
                       borderRadius: 6,
-                      borderColor: "var(--background)",
-                      borderWidth: 2,
+                      ...safeSeriesBorderStyle(2),
                     },
                     label: {
                       show: true,
@@ -185,7 +184,7 @@ export default function RegionsPage() {
                 type: "bar",
                 data: countries.slice(0, 5).map(c => c.value),
                 itemStyle: {
-                  borderRadius: [4, 4, 0, 0],
+                  borderRadius: barStartEdgeRadius("vertical", 4),
                 },
               })),
             }}

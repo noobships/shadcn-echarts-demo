@@ -11,45 +11,36 @@ import {
   getSubscriptionsByYear,
   calculateGrowthMetrics,
 } from "@/lib/customer-data"
+import {
+  chartMotionDefaults,
+  demoBlueScale,
+  safeGaugeStyle,
+} from "@/lib/chart-options"
 
 export default function TrendsPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Trend Analysis"
-          breadcrumbs={[{ label: "Trend Analysis" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-60 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const metrics = calculateGrowthMetrics(customers)
-  const monthlyData = getMonthlySubscriptions(customers)
-  const yearlyData = getSubscriptionsByYear(customers)
+  const hasData = customers.length > 0
+  const metrics = hasData ? calculateGrowthMetrics(customers) : { totalCustomers: 0, uniqueCountries: 0, uniqueCompanies: 0, avgPerMonth: 0, growthRate: 0, lastMonthCount: 0 }
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
 
   // Calculate moving averages
-  const movingAvg3 = monthlyData.map((_, idx, arr) => {
-    if (idx < 2) return null
-    return Math.round((arr[idx].count + arr[idx - 1].count + arr[idx - 2].count) / 3)
-  })
+  const movingAvg3 = monthlyData.length > 0
+    ? monthlyData.map((_, idx, arr) => {
+        if (idx < 2) return null
+        return Math.round((arr[idx].count + arr[idx - 1].count + arr[idx - 2].count) / 3)
+      })
+    : []
 
   // Calculate growth rate for gauge
-  const growthRate = Math.min(Math.max(metrics.growthRate + 50, 0), 100) // Normalize to 0-100
-
-  // Calculate year-over-year growth
+  const growthRate = Math.min(Math.max(metrics.growthRate + 50, 0), 100)
   const yoyGrowth = yearlyData.length >= 2
-    ? ((yearlyData[yearlyData.length - 1].count - yearlyData[yearlyData.length - 2].count) / yearlyData[yearlyData.length - 2].count * 100)
+    ? ((yearlyData[yearlyData.length - 1].count - yearlyData[yearlyData.length - 2].count) / Math.max(yearlyData[yearlyData.length - 2].count, 1) * 100)
     : 0
+  const gaugeBase = safeGaugeStyle()
+  const monthlyTarget = Math.max(metrics.avgPerMonth, 1)
+  const monthlyTargetMax = Math.max(Math.ceil(monthlyTarget * 1.5), monthlyTarget + 5)
 
   return (
     <>
@@ -67,8 +58,10 @@ export default function TrendsPage() {
             <GaugeChartComponent
               height={220}
               option={{
+                ...chartMotionDefaults,
                 series: [
                   {
+                    ...gaugeBase,
                     type: "gauge",
                     startAngle: 180,
                     endAngle: 0,
@@ -77,13 +70,15 @@ export default function TrendsPage() {
                     splitNumber: 5,
                     radius: "100%",
                     center: ["50%", "70%"],
+                    progress: { show: false },
                     axisLine: {
+                      ...gaugeBase.axisLine,
                       lineStyle: {
-                        width: 20,
+                        width: 16,
                         color: [
-                          [0.3, "var(--chart-5)"],
-                          [0.7, "var(--chart-3)"],
-                          [1, "var(--chart-1)"],
+                          [0.3, demoBlueScale[0]],
+                          [0.7, demoBlueScale[1]],
+                          [1, demoBlueScale[2]],
                         ],
                       },
                     },
@@ -105,9 +100,8 @@ export default function TrendsPage() {
                       show: false,
                     },
                     detail: {
-                      valueAnimation: true,
+                      ...gaugeBase.detail,
                       formatter: "{value}%",
-                      fontSize: 20,
                       offsetCenter: [0, "20%"],
                     },
                     data: [{ value: Math.round(growthRate) }],
@@ -124,8 +118,10 @@ export default function TrendsPage() {
             <GaugeChartComponent
               height={220}
               option={{
+                ...chartMotionDefaults,
                 series: [
                   {
+                    ...gaugeBase,
                     type: "gauge",
                     startAngle: 180,
                     endAngle: 0,
@@ -133,13 +129,15 @@ export default function TrendsPage() {
                     max: 50,
                     radius: "100%",
                     center: ["50%", "70%"],
+                    progress: { show: false },
                     axisLine: {
+                      ...gaugeBase.axisLine,
                       lineStyle: {
-                        width: 20,
+                        width: 16,
                         color: [
-                          [0.4, "var(--chart-5)"],
-                          [0.6, "var(--chart-3)"],
-                          [1, "var(--chart-1)"],
+                          [0.4, demoBlueScale[0]],
+                          [0.6, demoBlueScale[1]],
+                          [1, demoBlueScale[2]],
                         ],
                       },
                     },
@@ -152,9 +150,8 @@ export default function TrendsPage() {
                     splitLine: { show: false },
                     axisLabel: { show: false },
                     detail: {
-                      valueAnimation: true,
+                      ...gaugeBase.detail,
                       formatter: (value: number) => `${value > 0 ? "+" : ""}${value.toFixed(1)}%`,
-                      fontSize: 20,
                       offsetCenter: [0, "20%"],
                     },
                     data: [{ value: yoyGrowth }],
@@ -171,35 +168,45 @@ export default function TrendsPage() {
             <GaugeChartComponent
               height={220}
               option={{
+                ...chartMotionDefaults,
                 series: [
                   {
+                    ...gaugeBase,
                     type: "gauge",
                     startAngle: 180,
                     endAngle: 0,
                     min: 0,
-                    max: metrics.avgPerMonth * 1.5,
+                    max: monthlyTargetMax,
                     radius: "100%",
                     center: ["50%", "70%"],
                     progress: {
+                      ...gaugeBase.progress,
                       show: true,
-                      width: 20,
+                      width: 16,
+                      itemStyle: {
+                        color: demoBlueScale[1],
+                      },
                     },
                     axisLine: {
-                      lineStyle: {
-                        width: 20,
-                      },
+                      ...gaugeBase.axisLine,
+                      lineStyle: { width: 16 },
                     },
                     axisTick: { show: false },
                     splitLine: { show: false },
                     axisLabel: { show: false },
                     pointer: { show: false },
-                    detail: {
-                      valueAnimation: true,
-                      formatter: "{value}",
-                      fontSize: 24,
-                      offsetCenter: [0, "20%"],
+                    title: {
+                      show: true,
+                      offsetCenter: [0, "40%"],
+                      fontSize: 13,
                     },
-                    data: [{ value: metrics.lastMonthCount }],
+                    detail: {
+                      ...gaugeBase.detail,
+                      formatter: (value: number) => `${Math.round(value)} / ${monthlyTarget}`,
+                      fontSize: 21,
+                      offsetCenter: [0, "18%"],
+                    },
+                    data: [{ value: Math.min(metrics.lastMonthCount, monthlyTargetMax), name: "Customers this month" }],
                   },
                 ],
               }}

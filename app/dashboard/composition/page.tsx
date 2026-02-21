@@ -12,32 +12,41 @@ import {
   getSubscriptionsByYear,
   getDomainDistribution,
 } from "@/lib/customer-data"
+import {
+  chartMotionDefaults,
+  safeSeriesBorderStyle,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 
 export default function CompositionPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Composition"
-          breadcrumbs={[{ label: "Composition" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-80 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
+  const hasData = customers.length > 0
+  const topCountries = hasData ? getTopCountries(customers, 12) : []
+  const continentData = hasData ? getCustomersByContinent(customers) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
+  const domainData = hasData ? getDomainDistribution(customers) : []
+  const continentCountryMapping: Record<string, string[]> = {
+    "North America": ["United States of America", "Canada", "Mexico"],
+    Europe: ["United Kingdom", "Germany", "France", "Italy", "Spain", "Liechtenstein", "Latvia"],
+    Asia: ["China", "Japan", "India", "Korea", "Macao", "Nepal"],
+    Oceania: ["Australia", "New Zealand", "Fiji", "Papua New Guinea"],
   }
+  const treemapCountries = topCountries.filter(country => country.name !== "Others")
+  const visibleContinents = continentData.filter(continent => continent.name !== "Other").slice(0, 5)
+  const treemapData = visibleContinents
+    .map(continent => {
+      const children = treemapCountries
+        .filter(country => continentCountryMapping[continent.name]?.includes(country.name))
+        .map(country => ({ name: country.name, value: country.value }))
 
-  const topCountries = getTopCountries(customers, 12)
-  const continentData = getCustomersByContinent(customers)
-  const yearlyData = getSubscriptionsByYear(customers)
-  const domainData = getDomainDistribution(customers)
+      return {
+        name: continent.name,
+        value: children.reduce((sum, item) => sum + item.value, 0),
+        children,
+      }
+    })
+    .filter(continent => continent.children.length > 0)
 
   return (
     <>
@@ -55,9 +64,27 @@ export default function CompositionPage() {
             <PieChartComponent
               height={350}
               option={{
+                ...chartMotionDefaults,
                 tooltip: {
                   trigger: "item",
-                  formatter: "{b}: {c} ({d}%)",
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const value =
+                      typeof item?.value === "number" || typeof item?.value === "string"
+                        ? item.value
+                        : 0
+                    const percent =
+                      typeof item?.percent === "number"
+                        ? item.percent
+                        : Number(item?.percent ?? 0)
+
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(item?.name ?? "Unknown"),
+                      value,
+                      ` (${percent}%)`
+                    )
+                  },
                 },
                 legend: {
                   orient: "vertical",
@@ -73,8 +100,7 @@ export default function CompositionPage() {
                     avoidLabelOverlap: false,
                     itemStyle: {
                       borderRadius: 8,
-                      borderColor: "var(--background)",
-                      borderWidth: 3,
+                      ...safeSeriesBorderStyle(2),
                     },
                     label: {
                       show: false,
@@ -107,9 +133,27 @@ export default function CompositionPage() {
             <PieChartComponent
               height={350}
               option={{
+                ...chartMotionDefaults,
                 tooltip: {
                   trigger: "item",
-                  formatter: "{b}: {c} ({d}%)",
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const value =
+                      typeof item?.value === "number" || typeof item?.value === "string"
+                        ? item.value
+                        : 0
+                    const percent =
+                      typeof item?.percent === "number"
+                        ? item.percent
+                        : Number(item?.percent ?? 0)
+
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(item?.name ?? "Unknown"),
+                      value,
+                      ` (${percent}%)`
+                    )
+                  },
                 },
                 legend: {
                   orient: "horizontal",
@@ -163,11 +207,28 @@ export default function CompositionPage() {
             height={380}
             option={{
               tooltip: {
-                formatter: "{b}: {c} customers ({d}%)",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value,
+                    " customers"
+                  )
+                },
               },
               series: [
                 {
                   type: "treemap",
+                  top: 4,
+                  left: 4,
+                  right: 4,
+                  bottom: 4,
                   roam: false,
                   nodeClick: false,
                   breadcrumb: {
@@ -181,41 +242,7 @@ export default function CompositionPage() {
                     show: true,
                     height: 30,
                   },
-                  itemStyle: {
-                    borderColor: "var(--background)",
-                    borderWidth: 2,
-                    gapWidth: 2,
-                    borderRadius: 4,
-                  },
-                  levels: [
-                    {
-                      itemStyle: {
-                        borderWidth: 0,
-                        gapWidth: 5,
-                      },
-                    },
-                    {
-                      itemStyle: {
-                        gapWidth: 1,
-                      },
-                    },
-                  ],
-                  data: continentData.slice(0, 5).map(continent => ({
-                    name: continent.name,
-                    value: continent.value,
-                    children: topCountries
-                      .filter(country => {
-                        const mapping: Record<string, string[]> = {
-                          'North America': ['United States of America', 'Canada', 'Mexico'],
-                          'Europe': ['United Kingdom', 'Germany', 'France', 'Italy', 'Spain', 'Liechtenstein', 'Latvia'],
-                          'Asia': ['China', 'Japan', 'India', 'Korea', 'Macao', 'Nepal'],
-                          'Oceania': ['Australia', 'New Zealand', 'Fiji', 'Papua New Guinea'],
-                          'Other': [],
-                        }
-                        return mapping[continent.name]?.includes(country.name)
-                      })
-                      .map(c => ({ name: c.name, value: c.value })),
-                  })),
+                  data: treemapData,
                 },
               ],
             }}
@@ -247,10 +274,10 @@ export default function CompositionPage() {
                   },
                   data: [
                     ...yearlyData.map(y => ({ name: y.year })),
-                    ...continentData.slice(0, 5).map(c => ({ name: c.name })),
+                    ...visibleContinents.map(c => ({ name: c.name })),
                   ],
                   links: yearlyData.flatMap(year =>
-                    continentData.slice(0, 5).map(continent => ({
+                    visibleContinents.map(continent => ({
                       source: year.year,
                       target: continent.name,
                       value: Math.max(1, Math.round((year.count * continent.value) / customers.length)),

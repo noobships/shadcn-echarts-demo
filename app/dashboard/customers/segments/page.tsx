@@ -11,34 +11,19 @@ import {
   getSubscriptionsByYear,
   getTopCountries,
 } from "@/lib/customer-data"
+import {
+  chartMotionDefaults,
+  safeSeriesBorderStyle,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 
 export default function SegmentsPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Segments"
-          breadcrumbs={[
-            { label: "Customers", href: "/dashboard/customers" },
-            { label: "Segments" },
-          ]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-80 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const continentData = getCustomersByContinent(customers)
-  const yearlyData = getSubscriptionsByYear(customers)
-  const topCountries = getTopCountries(customers, 20)
+  const hasData = customers.length > 0
+  const continentData = hasData ? getCustomersByContinent(customers) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
+  const topCountries = hasData ? getTopCountries(customers, 20) : []
 
   // Create sunburst data structure
   const sunburstData = continentData.map(continent => ({
@@ -82,9 +67,27 @@ export default function SegmentsPage() {
             <PieChartComponent
               height={350}
               option={{
+                ...chartMotionDefaults,
                 tooltip: {
                   trigger: "item",
-                  formatter: "{b}: {c} ({d}%)",
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const value =
+                      typeof item?.value === "number" || typeof item?.value === "string"
+                        ? item.value
+                        : 0
+                    const percent =
+                      typeof item?.percent === "number"
+                        ? item.percent
+                        : Number(item?.percent ?? 0)
+
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(item?.name ?? "Unknown"),
+                      value,
+                      ` (${percent}%)`
+                    )
+                  },
                 },
                 legend: {
                   orient: "vertical",
@@ -100,8 +103,7 @@ export default function SegmentsPage() {
                     avoidLabelOverlap: false,
                     itemStyle: {
                       borderRadius: 8,
-                      borderColor: "var(--background)",
-                      borderWidth: 2,
+                      ...safeSeriesBorderStyle(2),
                     },
                     label: {
                       show: false,
@@ -132,7 +134,19 @@ export default function SegmentsPage() {
               option={{
                 tooltip: {
                   trigger: "item",
-                  formatter: "{b}: {c}",
+                  formatter: params => {
+                    const item = Array.isArray(params) ? params[0] : params
+                    const value =
+                      typeof item?.value === "number" || typeof item?.value === "string"
+                        ? item.value
+                        : 0
+
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(item?.name ?? "Unknown"),
+                      value
+                    )
+                  },
                 },
                 series: [
                   {
@@ -173,7 +187,19 @@ export default function SegmentsPage() {
             option={{
               tooltip: {
                 trigger: "item",
-                formatter: "{b}: {c}",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value
+                  )
+                },
               },
               series: [
                 {

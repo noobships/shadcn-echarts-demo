@@ -10,34 +10,15 @@ import {
   getSubscriptionsByYear,
   getQuarterlyStats,
 } from "@/lib/customer-data"
+import { barStartEdgeRadius, tooltipMarkerHtml } from "@/lib/chart-options"
 
 export default function ComparisonsPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Comparisons"
-          breadcrumbs={[
-            { label: "Analytics", href: "/dashboard/analytics" },
-            { label: "Comparisons" },
-          ]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-80 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const monthlyData = getMonthlySubscriptions(customers)
-  const yearlyData = getSubscriptionsByYear(customers)
-  const quarterlyData = getQuarterlyStats(customers)
+  const hasData = customers.length > 0
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
+  const quarterlyData = hasData ? getQuarterlyStats(customers) : []
 
   // Group monthly data by year for comparison
   const yearlyMonthlyData: Record<string, number[]> = {}
@@ -109,7 +90,7 @@ export default function ComparisonsPage() {
                 type: "bar",
                 data: values,
                 itemStyle: {
-                  borderRadius: [4, 4, 0, 0],
+                  borderRadius: barStartEdgeRadius("vertical", 4),
                 },
               })),
             }}
@@ -135,7 +116,7 @@ export default function ComparisonsPage() {
                     const [min, q1, median, q3, max] =
                       values.length >= 5 ? values.slice(-5) : [0, 0, 0, 0, 0]
 
-                    return `${String(item?.name ?? "")}<br/>
+                    return `${tooltipMarkerHtml(item)}${String(item?.name ?? "")}<br/>
                       Min: ${min}<br/>
                       Q1: ${q1}<br/>
                       Median: ${median}<br/>
@@ -249,7 +230,7 @@ export default function ComparisonsPage() {
                   type: "bar",
                   data: yearlyData.map(d => d.count),
                   itemStyle: {
-                    borderRadius: [8, 8, 0, 0],
+                    borderRadius: barStartEdgeRadius("vertical", 4),
                   },
                   label: {
                     show: true,

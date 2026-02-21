@@ -29,50 +29,49 @@ import {
   calculateGrowthMetrics,
   type Customer,
 } from "@/lib/customer-data"
+import {
+  axisGridPreset,
+  barStartEdgeRadius,
+  chartMotionDefaults,
+  safeSeriesBorderStyle,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
+
+const emptyMetrics = {
+  totalCustomers: 0,
+  uniqueCountries: 0,
+  uniqueCompanies: 0,
+  avgPerMonth: 0,
+  growthRate: 0,
+  lastMonthCount: 0,
+}
 
 export function DashboardContent() {
   const [customers, setCustomers] = useState<Customer[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch CSV data
     fetch("/customers-1000.csv")
       .then(res => res.text())
       .then(csvContent => {
         const parsed = parseCustomerCSV(csvContent)
         setCustomers(parsed)
-        setIsLoading(false)
       })
       .catch(err => {
         console.error("Failed to load customer data:", err)
-        setIsLoading(false)
       })
   }, [])
 
-  if (isLoading || customers.length === 0) {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-muted/50" />
-          ))}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <div className="col-span-4 h-80 animate-pulse rounded-xl bg-muted/50" />
-          <div className="col-span-3 h-80 animate-pulse rounded-xl bg-muted/50" />
-        </div>
-      </div>
-    )
-  }
-
-  const metrics = calculateGrowthMetrics(customers)
-  const topCountries = getTopCountries(customers, 8)
-  const monthlyData = getMonthlySubscriptions(customers)
-  const topCompanies = getTopCompanies(customers, 8)
-  const yearlyData = getSubscriptionsByYear(customers)
-  const quarterlyData = getQuarterlyStats(customers)
-  const continentData = getCustomersByContinent(customers)
-  const domainData = getDomainDistribution(customers)
+  const hasData = customers.length > 0
+  const metrics = hasData ? calculateGrowthMetrics(customers) : emptyMetrics
+  const topCountries = hasData ? getTopCountries(customers, 8) : []
+  const rankedCountries = topCountries.filter(country => country.name !== "Others")
+  const monthlyData = hasData ? getMonthlySubscriptions(customers) : []
+  const topCompanies = hasData ? getTopCompanies(customers, 8) : []
+  const yearlyData = hasData ? getSubscriptionsByYear(customers) : []
+  const quarterlyData = hasData ? getQuarterlyStats(customers) : []
+  const continentData = hasData ? getCustomersByContinent(customers) : []
+  const domainData = hasData ? getDomainDistribution(customers) : []
+  const horizontalBarGrid = axisGridPreset({ horizontalBar: true })
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
@@ -156,9 +155,27 @@ export function DashboardContent() {
           <PieChartComponent
             height={320}
             option={{
+              ...chartMotionDefaults,
               tooltip: {
                 trigger: "item",
-                formatter: "{b}: {c} ({d}%)",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+                  const percent =
+                    typeof item?.percent === "number"
+                      ? item.percent
+                      : Number(item?.percent ?? 0)
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value,
+                    ` (${percent}%)`
+                  )
+                },
               },
               legend: {
                 orient: "vertical",
@@ -174,8 +191,7 @@ export function DashboardContent() {
                   avoidLabelOverlap: false,
                   itemStyle: {
                     borderRadius: 8,
-                    borderColor: "var(--background)",
-                    borderWidth: 2,
+                    ...safeSeriesBorderStyle(2),
                   },
                   label: {
                     show: false,
@@ -214,10 +230,12 @@ export function DashboardContent() {
               },
               xAxis: {
                 type: "value",
+                ...horizontalBarGrid.xAxis,
               },
               yAxis: {
                 type: "category",
-                data: topCountries.map(d => d.name).reverse(),
+                data: rankedCountries.map(d => d.name).reverse(),
+                ...horizontalBarGrid.yAxis,
                 axisLabel: {
                   width: 80,
                   overflow: "truncate",
@@ -227,9 +245,9 @@ export function DashboardContent() {
                 {
                   name: "Customers",
                   type: "bar",
-                  data: topCountries.map(d => d.value).reverse(),
+                  data: rankedCountries.map(d => d.value).reverse(),
                   itemStyle: {
-                    borderRadius: [0, 4, 4, 0],
+                    borderRadius: barStartEdgeRadius("horizontal", 4),
                   },
                 },
               ],
@@ -305,7 +323,7 @@ export function DashboardContent() {
                   type: "bar",
                   data: yearlyData.map(d => d.count),
                   itemStyle: {
-                    borderRadius: [4, 4, 0, 0],
+                    borderRadius: barStartEdgeRadius("vertical", 4),
                   },
                   emphasis: {
                     itemStyle: {
@@ -337,10 +355,12 @@ export function DashboardContent() {
               },
               xAxis: {
                 type: "value",
+                ...horizontalBarGrid.xAxis,
               },
               yAxis: {
                 type: "category",
                 data: topCompanies.map(d => d.name).reverse(),
+                ...horizontalBarGrid.yAxis,
                 axisLabel: {
                   width: 100,
                   overflow: "truncate",
@@ -352,7 +372,7 @@ export function DashboardContent() {
                   type: "bar",
                   data: topCompanies.map(d => d.count).reverse(),
                   itemStyle: {
-                    borderRadius: [0, 4, 4, 0],
+                    borderRadius: barStartEdgeRadius("horizontal", 4),
                   },
                 },
               ],
@@ -374,7 +394,7 @@ export function DashboardContent() {
               radar: {
                 indicator: domainData.map(d => ({
                   name: `.${d.domain}`,
-                  max: Math.max(...domainData.map(x => x.count)) * 1.2,
+                  max: Math.max(...domainData.map(x => x.count), 1) * 1.2,
                 })),
                 shape: "polygon",
               },
@@ -382,15 +402,13 @@ export function DashboardContent() {
                 {
                   name: "Domains",
                   type: "radar",
-                  data: [
-                    {
-                      value: domainData.map(d => d.count),
-                      name: "Count",
-                      areaStyle: {
-                        opacity: 0.3,
-                      },
-                    },
-                  ],
+                  data: domainData.length > 0
+                    ? [{
+                        value: domainData.map(d => d.count),
+                        name: "Count",
+                        areaStyle: { opacity: 0.3 },
+                      }]
+                    : [],
                 },
               ],
             }}
@@ -407,7 +425,19 @@ export function DashboardContent() {
             option={{
               tooltip: {
                 trigger: "item",
-                formatter: "{b}: {c}",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value
+                  )
+                },
               },
               series: [
                 {
@@ -449,12 +479,29 @@ export function DashboardContent() {
             height={300}
             option={{
               tooltip: {
-                formatter: "{b}: {c} customers",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value,
+                    " customers"
+                  )
+                },
               },
               series: [
                 {
                   name: "Countries",
                   type: "treemap",
+                  top: 4,
+                  left: 4,
+                  right: 4,
+                  bottom: 4,
                   roam: false,
                   nodeClick: false,
                   breadcrumb: {
@@ -464,20 +511,7 @@ export function DashboardContent() {
                     show: true,
                     formatter: "{b}",
                   },
-                  itemStyle: {
-                    borderRadius: 4,
-                    borderWidth: 2,
-                    gapWidth: 2,
-                  },
-                  levels: [
-                    {
-                      itemStyle: {
-                        borderWidth: 0,
-                        gapWidth: 4,
-                      },
-                    },
-                  ],
-                  data: topCountries.slice(0, 12).map(d => ({
+                  data: rankedCountries.slice(0, 10).map(d => ({
                     name: d.name,
                     value: d.value,
                   })),
@@ -502,14 +536,25 @@ export function DashboardContent() {
                     return ""
                   }
 
+                  const item = params
                   const [monthIndex, count, year] = params.data
                   const monthNumber = typeof monthIndex === "number" ? monthIndex : Number(monthIndex)
                   if (!Number.isFinite(monthNumber) || monthNumber < 1 || monthNumber > 12) {
-                    return `${year}: ${count} customers`
+                    return tooltipMarkerLabelValue(
+                      item,
+                      String(year),
+                      String(count),
+                      " customers"
+                    )
                   }
 
                   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-                  return `${months[monthNumber - 1]} ${year}: ${count} customers`
+                  return tooltipMarkerLabelValue(
+                    item,
+                    `${months[monthNumber - 1]} ${year}`,
+                    String(count),
+                    " customers"
+                  )
                 },
               },
               xAxis: {

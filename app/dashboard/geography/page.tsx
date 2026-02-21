@@ -10,33 +10,23 @@ import {
   getTopCities,
   calculateGrowthMetrics,
 } from "@/lib/customer-data"
+import {
+  axisGridPreset,
+  barStartEdgeRadius,
+  tooltipMarkerLabelValue,
+} from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { GlobeIcon, MapPinIcon, FlagIcon, BuildingIcon } from "lucide-react"
 
 export default function GeographyPage() {
-  const { customers, isLoading } = useCustomerData()
+  const { customers } = useCustomerData()
 
-  if (isLoading) {
-    return (
-      <>
-        <PageHeader
-          title="Geography"
-          breadcrumbs={[{ label: "Geography" }]}
-        />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-28 animate-pulse rounded-xl bg-muted/50" />
-            ))}
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  const metrics = calculateGrowthMetrics(customers)
-  const topCountries = getTopCountries(customers, 15)
-  const topCities = getTopCities(customers, 15)
+  const hasData = customers.length > 0
+  const metrics = hasData ? calculateGrowthMetrics(customers) : { totalCustomers: 0, uniqueCountries: 0, uniqueCompanies: 0, avgPerMonth: 0, growthRate: 0, lastMonthCount: 0 }
+  const topCountries = hasData ? getTopCountries(customers, 15) : []
+  const topCities = hasData ? getTopCities(customers, 15) : []
+  const rankedCountries = topCountries.filter(country => country.name !== "Others")
+  const horizontalBarGrid = axisGridPreset({ horizontalBar: true })
 
   return (
     <>
@@ -82,12 +72,29 @@ export default function GeographyPage() {
             height={400}
             option={{
               tooltip: {
-                formatter: "{b}: {c} customers",
+                formatter: params => {
+                  const item = Array.isArray(params) ? params[0] : params
+                  const value =
+                    typeof item?.value === "number" || typeof item?.value === "string"
+                      ? item.value
+                      : 0
+
+                  return tooltipMarkerLabelValue(
+                    item,
+                    String(item?.name ?? "Unknown"),
+                    value,
+                    " customers"
+                  )
+                },
               },
               series: [
                 {
                   name: "Countries",
                   type: "treemap",
+                  top: 4,
+                  left: 4,
+                  right: 4,
+                  bottom: 4,
                   roam: false,
                   nodeClick: false,
                   breadcrumb: {
@@ -97,20 +104,7 @@ export default function GeographyPage() {
                     show: true,
                     formatter: "{b}\n{c}",
                   },
-                  itemStyle: {
-                    borderRadius: 4,
-                    borderWidth: 2,
-                    gapWidth: 2,
-                  },
-                  levels: [
-                    {
-                      itemStyle: {
-                        borderWidth: 0,
-                        gapWidth: 4,
-                      },
-                    },
-                  ],
-                  data: topCountries.map(d => ({
+                  data: rankedCountries.slice(0, 12).map(d => ({
                     name: d.name,
                     value: d.value,
                   })),
@@ -141,10 +135,12 @@ export default function GeographyPage() {
                 },
                 xAxis: {
                   type: "value",
+                  ...horizontalBarGrid.xAxis,
                 },
                 yAxis: {
                   type: "category",
-                  data: topCountries.slice(0, 10).map(d => d.name).reverse(),
+                  data: rankedCountries.slice(0, 10).map(d => d.name).reverse(),
+                  ...horizontalBarGrid.yAxis,
                   axisLabel: {
                     width: 100,
                     overflow: "truncate",
@@ -154,9 +150,9 @@ export default function GeographyPage() {
                   {
                     name: "Customers",
                     type: "bar",
-                    data: topCountries.slice(0, 10).map(d => d.value).reverse(),
+                    data: rankedCountries.slice(0, 10).map(d => d.value).reverse(),
                     itemStyle: {
-                      borderRadius: [0, 4, 4, 0],
+                      borderRadius: barStartEdgeRadius("horizontal", 4),
                     },
                   },
                 ],
@@ -183,10 +179,12 @@ export default function GeographyPage() {
                 },
                 xAxis: {
                   type: "value",
+                  ...horizontalBarGrid.xAxis,
                 },
                 yAxis: {
                   type: "category",
                   data: topCities.slice(0, 10).map(d => d.name).reverse(),
+                  ...horizontalBarGrid.yAxis,
                   axisLabel: {
                     width: 100,
                     overflow: "truncate",
@@ -198,7 +196,7 @@ export default function GeographyPage() {
                     type: "bar",
                     data: topCities.slice(0, 10).map(d => d.value).reverse(),
                     itemStyle: {
-                      borderRadius: [0, 4, 4, 0],
+                      borderRadius: barStartEdgeRadius("horizontal", 4),
                     },
                   },
                 ],
