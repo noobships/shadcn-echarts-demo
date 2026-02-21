@@ -3,9 +3,12 @@
 import React from "react"
 import { LineChart } from "@devstool/shadcn-echarts"
 import type { LineChartProps } from "@devstool/shadcn-echarts"
+import { withChartMotionOption } from "@/lib/chart-options"
+import { useMountAnimation } from "@/hooks/use-mount-animation"
 
 export type { LineChartProps }
 
 export function LineChartComponent(props: LineChartProps) {
-  return <LineChart {...props} />
+  const option = useMountAnimation(withChartMotionOption(props.option))
+  return <LineChart {...props} option={option} animateOnMount={false} />
 }

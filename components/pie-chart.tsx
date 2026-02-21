@@ -3,9 +3,12 @@
 import React from "react"
 import { PieChart } from "@devstool/shadcn-echarts"
 import type { PieChartProps } from "@devstool/shadcn-echarts"
+import { withChartMotionOption } from "@/lib/chart-options"
+import { useMountAnimation } from "@/hooks/use-mount-animation"
 
 export type { PieChartProps }
 
 export function PieChartComponent(props: PieChartProps) {
-  return <PieChart {...props} />
+  const option = useMountAnimation(withChartMotionOption(props.option))
+  return <PieChart {...props} option={option} animateOnMount={false} />
 }

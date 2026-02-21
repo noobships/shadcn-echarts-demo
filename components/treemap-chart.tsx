@@ -3,9 +3,12 @@
 import React from "react"
 import { TreemapChart } from "@devstool/shadcn-echarts"
 import type { TreemapChartProps } from "@devstool/shadcn-echarts"
+import { withChartMotionOption } from "@/lib/chart-options"
+import { useMountAnimation } from "@/hooks/use-mount-animation"
 
 export type { TreemapChartProps }
 
 export function TreemapChartComponent(props: TreemapChartProps) {
-  return <TreemapChart {...props} />
+  const option = useMountAnimation(withChartMotionOption(props.option))
+  return <TreemapChart {...props} option={option} animateOnMount={false} />
 }
