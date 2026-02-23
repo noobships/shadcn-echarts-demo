@@ -174,7 +174,7 @@ export function FontSwitcher() {
               className="flex items-center justify-between gap-2"
             >
               <span className="flex items-center gap-2">
-                <span className="flex h-4 w-4 items-center justify-center text-muted-foreground">
+                <span className="flex h-4 w-4 items-center justify-center text-chart-1/55">
                   {variant.icon}
                 </span>
                 <span
@@ -200,7 +200,7 @@ export function FontSwitcher() {
               className="flex items-center justify-between gap-2"
             >
               <span className="flex items-center gap-2">
-                <span className="flex h-4 w-4 items-center justify-center text-muted-foreground">
+                <span className="flex h-4 w-4 items-center justify-center text-chart-1/55">
                   {variant.icon}
                 </span>
                 <span

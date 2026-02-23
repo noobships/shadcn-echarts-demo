@@ -10,7 +10,7 @@ export const chartMotionDefaults = {
   animationDelayUpdate: 0,
 } as const
 
-export const demoBlueScale = ["#8eb8eb", "#3b82f6", "#1d4ed8"] as const
+export const demoBlueScale = ["#ffcbb7", "#ff3100", "#a60000"] as const
 
 export function withChartMotionOption<TOption>(option: TOption): TOption {
   if (!option || typeof option !== "object" || Array.isArray(option)) {
@@ -115,7 +115,7 @@ export function safeHeatmapEmphasis() {
   return {
     itemStyle: {
       shadowBlur: 8,
-      shadowColor: "rgba(59, 130, 246, 0.22)",
+      shadowColor: "rgba(255, 49, 0, 0.22)",
     },
   }
 }

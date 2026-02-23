@@ -29,9 +29,9 @@ import {
 // Dashboard navigation data
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "NoobShips",
+    email: "creativecoder.crco@gmail.com",
+    avatar: "https://avatars.githubusercontent.com/u/85483006?v=4",
   },
   teams: [
     {

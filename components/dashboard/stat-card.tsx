@@ -48,9 +48,9 @@ export function StatCard({
       : MinusIcon
 
   const trendColor = trend && trend > 0 
-    ? "text-emerald-600 dark:text-emerald-400" 
+    ? "text-chart-4" 
     : trend && trend < 0 
-      ? "text-red-600 dark:text-red-400" 
+      ? "text-chart-1" 
       : "text-muted-foreground"
 
   const isNumericValue = typeof value === "number" && Number.isFinite(value)
@@ -78,7 +78,11 @@ export function StatCard({
       />
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        {icon && <div className="text-muted-foreground/60 [&_svg]:size-4">{icon}</div>}
+        {icon && (
+          <div className="flex size-9 items-center justify-center rounded-lg bg-chart-1/10 text-chart-1 [&_svg]:size-4">
+            {icon}
+          </div>
+        )}
       </div>
       <div className="mt-2">
         <p
