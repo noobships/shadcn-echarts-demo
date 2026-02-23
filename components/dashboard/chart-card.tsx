@@ -19,7 +19,7 @@ export function ChartCard({
   action,
 }: ChartCardProps) {
   return (
-    <Card className={cn("flex flex-col", className)}>
+    <Card className={cn("flex flex-col shadow-none", className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="space-y-1">
           <CardTitle className="text-base font-semibold">{title}</CardTitle>

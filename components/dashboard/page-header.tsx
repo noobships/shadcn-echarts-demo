@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { FontSwitcher } from "@/components/font-switcher"
 
 interface PageHeaderProps {
   title: string
@@ -59,6 +60,7 @@ export function PageHeader({ title, breadcrumbs = [] }: PageHeaderProps) {
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2 px-4">
+        <FontSwitcher />
         <ThemeToggle />
       </div>
     </header>

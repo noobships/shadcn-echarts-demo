@@ -81,10 +81,16 @@ export function StatCard({
         {icon && <div className="text-muted-foreground/60 [&_svg]:size-4">{icon}</div>}
       </div>
       <div className="mt-2">
-        <p className="text-3xl font-semibold tracking-tight">
+        <p
+          className={cn(
+            "text-3xl font-semibold tracking-tight",
+            isNumericValue && "font-mono tabular-nums"
+          )}
+        >
           {isNumericValue ? (
             <NumberFlow
               value={value}
+              className="font-mono tabular-nums tracking-[var(--tracking-tight)]"
               format={
                 valueFormat ??
                 (Number.isInteger(value)
@@ -106,6 +112,7 @@ export function StatCard({
               {descriptionPrefix}
               <NumberFlow
                 value={descriptionValue}
+                className="font-mono tabular-nums tracking-[var(--tracking-tight)]"
                 format={
                   descriptionFormat ??
                   (Number.isInteger(descriptionValue)
@@ -128,7 +135,7 @@ export function StatCard({
               value={trendMagnitude}
               format={trendFormat}
               suffix="%"
-              className="tabular-nums"
+              className="font-mono tabular-nums tracking-[var(--tracking-tight)]"
             />
           </span>
           {trendLabel && (
