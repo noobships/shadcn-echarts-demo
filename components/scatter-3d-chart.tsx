@@ -3,9 +3,15 @@
 import React from "react"
 import { Scatter3DChart } from "@devstool/shadcn-echarts"
 import type { Scatter3DChartProps } from "@devstool/shadcn-echarts"
+import { cn } from "@/lib/utils"
 
 export type { Scatter3DChartProps }
 
 export function Scatter3DChartComponent(props: Scatter3DChartProps) {
-  return <Scatter3DChart {...props} />
+  return (
+    <Scatter3DChart
+      {...props}
+      className={cn("[letter-spacing:0em]", (props as { className?: string }).className)}
+    />
+  )
 }

@@ -3,9 +3,15 @@
 import React from "react"
 import { Map3DChart } from "@devstool/shadcn-echarts"
 import type { Map3DChartProps } from "@devstool/shadcn-echarts"
+import { cn } from "@/lib/utils"
 
 export type { Map3DChartProps }
 
 export function Map3DChartComponent(props: Map3DChartProps) {
-  return <Map3DChart {...props} />
+  return (
+    <Map3DChart
+      {...props}
+      className={cn("[letter-spacing:0em]", (props as { className?: string }).className)}
+    />
+  )
 }

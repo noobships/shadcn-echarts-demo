@@ -60,7 +60,10 @@ export function tooltipMarkerLabelValue(
   value: string | number,
   suffix = ""
 ) {
-  return `${tooltipMarkerHtml(input)}${label}: ${value}${suffix}`
+  const monoValueStyle =
+    "font-family:var(--font-geist-mono),ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;font-variant-numeric:tabular-nums;"
+
+  return `${tooltipMarkerHtml(input)}${label}: <span style="${monoValueStyle}">${value}${suffix}</span>`
 }
 
 export function barStartEdgeRadius(

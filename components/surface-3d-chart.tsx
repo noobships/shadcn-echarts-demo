@@ -3,9 +3,15 @@
 import React from "react"
 import { Surface3DChart } from "@devstool/shadcn-echarts"
 import type { Surface3DChartProps } from "@devstool/shadcn-echarts"
+import { cn } from "@/lib/utils"
 
 export type { Surface3DChartProps }
 
 export function Surface3DChartComponent(props: Surface3DChartProps) {
-  return <Surface3DChart {...props} />
+  return (
+    <Surface3DChart
+      {...props}
+      className={cn("[letter-spacing:0em]", (props as { className?: string }).className)}
+    />
+  )
 }

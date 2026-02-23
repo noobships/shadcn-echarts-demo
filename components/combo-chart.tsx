@@ -17,6 +17,7 @@ import { LabelLayout, UniversalTransition } from "echarts/features"
 import { CanvasRenderer, SVGRenderer } from "echarts/renderers"
 import { withChartMotionOption } from "@/lib/chart-options"
 import { useMountAnimation } from "@/hooks/use-mount-animation"
+import { cn } from "@/lib/utils"
 
 let registered = false
 
@@ -42,5 +43,12 @@ export type ComboChartProps = ChartProps
 
 export function ComboChartComponent(props: ComboChartProps) {
   const option = useMountAnimation(withChartMotionOption(props.option))
-  return <Chart {...props} option={option} animateOnMount={false} />
+  return (
+    <Chart
+      {...props}
+      className={cn("[letter-spacing:0em]", (props as { className?: string }).className)}
+      option={option}
+      animateOnMount={false}
+    />
+  )
 }
