@@ -17,6 +17,7 @@ import {
   tooltipMarkerLabelValue,
 } from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { StatsOverview } from "@/components/dashboard/stats-overview"
 import { UsersIcon, BuildingIcon, TrendingUpIcon, CalendarIcon } from "lucide-react"
 
 export default function CustomersPage() {
@@ -43,10 +44,10 @@ export default function CustomersPage() {
       />
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsOverview>
           <StatCard
             title="Total Customers"
-            value={metrics.totalCustomers.toLocaleString()}
+            value={metrics.totalCustomers}
             trend={metrics.growthRate}
             trendLabel="from last month"
             icon={<UsersIcon className="h-5 w-5" />}
@@ -69,7 +70,7 @@ export default function CustomersPage() {
             description="New signups"
             icon={<CalendarIcon className="h-5 w-5" />}
           />
-        </div>
+        </StatsOverview>
 
         {/* Charts */}
         <div className="grid gap-4 lg:grid-cols-2">

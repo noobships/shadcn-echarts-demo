@@ -102,6 +102,7 @@ export default function TrendsPage() {
                     detail: {
                       ...gaugeBase.detail,
                       formatter: "{value}%",
+                      valueAnimation: true,
                       offsetCenter: [0, "20%"],
                     },
                     data: [{ value: Math.round(growthRate) }],
@@ -152,6 +153,7 @@ export default function TrendsPage() {
                     detail: {
                       ...gaugeBase.detail,
                       formatter: (value: number) => `${value > 0 ? "+" : ""}${value.toFixed(1)}%`,
+                      valueAnimation: true,
                       offsetCenter: [0, "20%"],
                     },
                     data: [{ value: yoyGrowth }],
@@ -203,6 +205,7 @@ export default function TrendsPage() {
                     detail: {
                       ...gaugeBase.detail,
                       formatter: (value: number) => `${Math.round(value)} / ${monthlyTarget}`,
+                      valueAnimation: true,
                       fontSize: 21,
                       offsetCenter: [0, "18%"],
                     },

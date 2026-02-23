@@ -11,6 +11,7 @@ import {
 } from "@/lib/customer-data"
 import { barStartEdgeRadius } from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { StatsOverview } from "@/components/dashboard/stats-overview"
 import { TrendingUpIcon, ActivityIcon, BarChart2Icon, LineChartIcon } from "lucide-react"
 
 export default function AnalyticsPage() {
@@ -25,7 +26,7 @@ export default function AnalyticsPage() {
   const prevThreeMonths = monthlyData.slice(-6, -3)
   const recentAvg = lastThreeMonths.length > 0 ? lastThreeMonths.reduce((sum, m) => sum + m.count, 0) / lastThreeMonths.length : 0
   const prevAvg = prevThreeMonths.length > 0 ? prevThreeMonths.reduce((sum, m) => sum + m.count, 0) / prevThreeMonths.length : 0
-  const trendPercent = prevAvg > 0 ? ((recentAvg - prevAvg) / prevAvg * 100).toFixed(1) : "0"
+  const trendPercent = prevAvg > 0 ? ((recentAvg - prevAvg) / prevAvg * 100) : 0
 
   const maxMonth = monthlyData.length > 0 ? monthlyData.reduce((max, m) => m.count > max.count ? m : max, monthlyData[0]) : null
   const minMonth = monthlyData.length > 0 ? monthlyData.reduce((min, m) => m.count < min.count ? m : min, monthlyData[0]) : null
@@ -38,24 +39,28 @@ export default function AnalyticsPage() {
       />
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsOverview>
           <StatCard
             title="3-Month Trend"
-            value={`${trendPercent}%`}
-            trend={parseFloat(String(trendPercent))}
+            value={trendPercent}
+            valueSuffix="%"
+            valueFormat={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }}
+            trend={trendPercent}
             description="vs previous quarter"
             icon={<TrendingUpIcon className="h-5 w-5" />}
           />
           <StatCard
             title="Peak Month"
             value={maxMonth?.month || "N/A"}
-            description={`${maxMonth?.count || 0} signups`}
+            descriptionValue={maxMonth?.count || 0}
+            descriptionSuffix=" signups"
             icon={<ActivityIcon className="h-5 w-5" />}
           />
           <StatCard
             title="Lowest Month"
             value={minMonth?.month || "N/A"}
-            description={`${minMonth?.count || 0} signups`}
+            descriptionValue={minMonth?.count || 0}
+            descriptionSuffix=" signups"
             icon={<BarChart2Icon className="h-5 w-5" />}
           />
           <StatCard
@@ -64,7 +69,7 @@ export default function AnalyticsPage() {
             description="customers per month"
             icon={<LineChartIcon className="h-5 w-5" />}
           />
-        </div>
+        </StatsOverview>
 
         {/* Main trend chart */}
         <ChartCard

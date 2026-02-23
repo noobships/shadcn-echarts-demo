@@ -16,6 +16,7 @@ import {
   tooltipMarkerLabelValue,
 } from "@/lib/chart-options"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { StatsOverview } from "@/components/dashboard/stats-overview"
 import { GlobeIcon, MapPinIcon, FlagIcon, BuildingIcon } from "lucide-react"
 
 export default function GeographyPage() {
@@ -36,7 +37,7 @@ export default function GeographyPage() {
       />
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
         {/* Stats */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsOverview>
           <StatCard
             title="Countries"
             value={metrics.uniqueCountries}
@@ -46,13 +47,15 @@ export default function GeographyPage() {
           <StatCard
             title="Top Country"
             value={topCountries[0]?.name || "N/A"}
-            description={`${topCountries[0]?.value || 0} customers`}
+            descriptionValue={topCountries[0]?.value || 0}
+            descriptionSuffix=" customers"
             icon={<FlagIcon className="h-5 w-5" />}
           />
           <StatCard
             title="Top City"
             value={topCities[0]?.name || "N/A"}
-            description={`${topCities[0]?.value || 0} customers`}
+            descriptionValue={topCities[0]?.value || 0}
+            descriptionSuffix=" customers"
             icon={<MapPinIcon className="h-5 w-5" />}
           />
           <StatCard
@@ -61,7 +64,7 @@ export default function GeographyPage() {
             description="Across all regions"
             icon={<BuildingIcon className="h-5 w-5" />}
           />
-        </div>
+        </StatsOverview>
 
         {/* Treemap */}
         <ChartCard

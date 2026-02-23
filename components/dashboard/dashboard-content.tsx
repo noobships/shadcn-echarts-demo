@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { StatCard } from "./stat-card"
+import { StatsOverview } from "./stats-overview"
 import { ChartCard } from "./chart-card"
 import { AreaChartComponent } from "@/components/area-chart"
 import { BarChartComponent } from "@/components/bar-chart"
@@ -76,10 +77,10 @@ export function DashboardContent() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatsOverview>
         <StatCard
           title="Total Customers"
-          value={metrics.totalCustomers.toLocaleString()}
+          value={metrics.totalCustomers}
           trend={metrics.growthRate}
           trendLabel="from last month"
           icon={<UsersIcon className="h-5 w-5" />}
@@ -102,7 +103,7 @@ export function DashboardContent() {
           description="New customers per month"
           icon={<TrendingUpIcon className="h-5 w-5" />}
         />
-      </div>
+      </StatsOverview>
 
       {/* Main Charts Row */}
       <div className="grid gap-4 lg:grid-cols-7">
