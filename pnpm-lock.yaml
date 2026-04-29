@@ -12,8 +12,8 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@devstool/shadcn-echarts':
-        specifier: ^0.3.0
-        version: 0.3.0(echarts@6.0.0)(react@19.2.3)
+        specifier: ^0.4.0
+        version: 0.4.0(echarts@6.0.0)(react@19.2.3)
       '@number-flow/react':
         specifier: ^0.5.12
         version: 0.5.12(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -246,8 +246,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@devstool/shadcn-echarts@0.3.0':
-    resolution: {integrity: sha512-9+0QiSt5hYhMYjaf80yr0mBli82Ewn4bdj6PuAXzwBhfz3+aeuK9B+qPyTFJ9gxj5G5hfOmAzpSvbQU++FTHKQ==}
+  '@devstool/shadcn-echarts@0.4.0':
+    resolution: {integrity: sha512-t5OyW2JRq5cSc8cTL0KM6gs+GMnmDB/fFi1Wzr/jlP8lIwq1oWHHeM9nn7raAJZn7OQwX8x2hCXUy83jiU3OjA==}
     peerDependencies:
       echarts: '>=6.0.0'
       react: '>=18.0.0'
@@ -3380,7 +3380,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@devstool/shadcn-echarts@0.3.0(echarts@6.0.0)(react@19.2.3)':
+  '@devstool/shadcn-echarts@0.4.0(echarts@6.0.0)(react@19.2.3)':
     dependencies:
       culori: 4.0.2
       echarts: 6.0.0
