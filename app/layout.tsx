@@ -11,6 +11,7 @@ import {
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ChartProvider } from "@/components/chart-provider";
 
 export const metadata: Metadata = {
   title: "Customer Analytics | shadcn-echarts Demo",
@@ -70,9 +71,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider delay={0}>
-            {children}
-          </TooltipProvider>
+          <ChartProvider animateOnMount={false}>
+            <TooltipProvider delay={0}>
+              {children}
+            </TooltipProvider>
+          </ChartProvider>
         </ThemeProvider>
       </body>
     </html>

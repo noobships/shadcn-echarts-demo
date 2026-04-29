@@ -16,7 +16,6 @@ export function TreemapChartComponent(props: TreemapChartProps) {
       {...props}
       className={cn("[letter-spacing:0em]", (props as { className?: string }).className)}
       option={option}
-      animateOnMount={false}
     />
   )
 }
